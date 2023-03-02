@@ -1,0 +1,196 @@
+<!doctype html>
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <title>表格管理平台</title>
+</head>
+<body>
+<div>
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="panel panel-default">
+            <div>
+                <h3>表格管理平台</h3>
+            </div>
+            <div>
+                <div>
+                    <p><button onClick="addTr()">添加</button></p>
+                    <table class="table table-striped table-bordered table-hover" id="tsxt_info">
+                        <thead>
+                        <tr>
+                            {% for i in labels %}
+                                <td>{{ i }}</td>
+                            {% endfor %}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for i in content %}
+                            <tr>
+                                {% for j in i %}
+                                    <td>{{ j }}</td>
+                                {% endfor %}
+
+                                <td><input type="button" value="编辑"></td>
+                                <td><button onclick="upload_data(this)">提交</button></td>
+                            </tr>
+                        {% endfor %}
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+<script>
+    (function(){
+      $('input[type="button"]').on('click', function(){
+        var $this = $(this),
+          edit_status = $this.attr('edit_status'),
+          status_value = edit_status && 1 == edit_status ? 0 : 1,
+          $td_arr = $this.parent().prevAll('td');
+        $this.val(1 == status_value ? '完成' : '编辑').attr('edit_status', status_value);
+        $.each($td_arr, function(){
+          var $td = $(this);
+          if(1 == status_value) {
+            $td.html('<input type="text" value="'+$td.html()+'">');
+          } else if(0 == status_value){
+            $td.html($td.find('input[type=text]').val());
+          }
+        });
+      });
+    })();
+</script>
+<script src="https://upcdn.b0.upaiyun.com/libs/jquery/jquery-2.0.2.min.js">
+</script>
+<script>
+    function addTr() {
+        var tr = document.createElement("tr");
+
+        for (var i = 0; i < 5; i++) {
+            var td = document.createElement("td");
+            td.innerHTML = "-";
+            tr.appendChild(td);
+        }
+
+        var edit = "<input type=\"button\" value=\"编辑\">";
+        var edit_td = document.createElement("td");
+        edit_td.innerHTML = edit;
+        var upload = "<button onclick=\"insert_data(this)\">新建</button>";
+        var upload_td = document.createElement("td");
+        upload_td.innerHTML = upload;
+
+        tr.appendChild(edit_td);
+        tr.appendChild(upload_td);
+
+        document.getElementById('tsxt_info').appendChild(tr);
+
+        (function(){
+      $('input[type="button"]').on('click', function(){
+        var $this = $(this),
+          edit_status = $this.attr('edit_status'),
+          status_value = edit_status && 1 == edit_status ? 0 : 1,
+          $td_arr = $this.parent().prevAll('td');
+        $this.val(1 == status_value ? '完成' : '编辑').attr('edit_status', status_value);
+        $.each($td_arr, function(){
+          var $td = $(this);
+          if(1 == status_value) {
+            $td.html('<input type="text" value="'+$td.html()+'">');
+          } else if(0 == status_value){
+            $td.html($td.find('input[type=text]').val());
+          }
+        });
+      });
+    })();
+    }
+</script>
+<script>
+    function upload_data(button) {
+        // 获取当前行
+        var row = button.parentNode.parentNode;
+
+        // 获取该行中所有单元格的数据
+        var cells = row.getElementsByTagName("td");
+        var rowData = "";
+
+        // 将每个单元格的数据添加到rowData字符串中
+        for (var i = 0; i < cells.length; i++) {
+            rowData += cells[i].innerHTML + " ";
+        }
+
+        var data = {
+                    "学号":cells[0].innerHTML,
+                    "姓名":cells[1].innerHTML,
+                    "性别":cells[2].innerHTML,
+                    "年级":cells[3].innerHTML,
+                    "取向":cells[4].innerHTML,
+                };
+
+        $.ajax({
+                    type: "get",
+                    url: "/edit",
+                    data: data,
+                    dataType: "json"
+                    });
+
+        // 输出rowData字符串
+        console.log(rowData);
+        alert("提交成功！");
+    }
+</script>
+<script>
+    function insert_data(button) {
+        // 获取当前行
+        var row = button.parentNode.parentNode;
+
+        // 获取该行中所有单元格的数据
+        var cells = row.getElementsByTagName("td");
+        var rowData = "";
+
+        // 将每个单元格的数据添加到rowData字符串中
+        for (var i = 0; i < cells.length; i++) {
+            rowData += cells[i].innerHTML + " ";
+        }
+
+        var data = {
+                    "学号":cells[0].innerHTML,
+                    "姓名":cells[1].innerHTML,
+                    "性别":cells[2].innerHTML,
+                    "年级":cells[3].innerHTML,
+                    "取向":cells[4].innerHTML,
+                };
+
+        $.ajax({
+                    type: "get",
+                    url: "/add",
+                    data: data,
+                    dataType: "json"
+                    });
+
+        // 输出rowData字符串
+        console.log(rowData);
+        alert("提交成功！");
+        button.onclick = upload_data;
+        button.text = "提交";
+    }
+</script>
+</body>
